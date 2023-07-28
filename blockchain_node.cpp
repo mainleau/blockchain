@@ -1,8 +1,19 @@
 // blockchain_node.cpp
 
 #include "blockchain_node.h"
+#include "p2p_network.h"
 #include <iostream>
 #include <thread>
+
+void BlockchainNode::connectToInitialPeers() {
+    connectToPeer("127.0.0.1", 8081);
+    connectToPeer("127.0.0.1", 8082);
+}
+
+void BlockchainNode::connectToPeer(const std::string& ipAddress, int port) {
+    p2pNetwork.connectToPeer(ipAddress, port);
+    // ...
+}
 
 BlockchainNode::BlockchainNode(int port) {
     p2pNetwork.startServer();
@@ -10,8 +21,7 @@ BlockchainNode::BlockchainNode(int port) {
 
 void BlockchainNode::start() {
     // Connect to initial peers (for simplicity, we connect to two peers here)
-    connectToPeer("127.0.0.1", 8081);
-    connectToPeer("127.0.0.1", 8082);
+    // connectToInitialPeers();
 
     while (true) {
         // Simulate mining a new block
@@ -54,11 +64,4 @@ void BlockchainNode::handleNewBlock(const Block& block) {
     } else {
         std::cout << "Received invalid block, discarding..." << std::endl;
     }
-}
-
-void BlockchainNode::connectToPeer(const std::string& ipAddress, int port) {
-    p2pNetwork.connectToPeer(ipAddress, port, [this](const std::string& data) {
-        Block receivedBlock = deserializeBlock(data);
-        handleNewBlock(receivedBlock);
-    });
 }

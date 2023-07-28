@@ -13,10 +13,10 @@ class BlockchainNode {
         BlockchainNode(int port);
         void start();
 
+        void connectToInitialPeers();
         void connectToPeer(const std::string& ipAddress, int port);
-    private:
         void handleNewBlock(const Block& block);
-
+    private:
         Blockchain blockchain;
         P2PNetwork p2pNetwork;
 };

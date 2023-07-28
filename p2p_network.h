@@ -16,7 +16,7 @@ const int PORT = 8080;
 class P2PNetwork {
 public:
     void startServer();
-    void connectToPeer(const std::string& ipAddress);
+    void connectToPeer(const std::string& ipAddress, int port);
     void broadcast(const std::string& message, int senderSockfd = -1);
 private:
     void handleConnection(int clientSockfd);

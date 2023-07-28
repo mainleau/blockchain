@@ -1,1 +1,1 @@
-g++ node1.cpp blockchain.cpp -o node1 -lssl -lcrypto && g++ node2.cpp blockchain.cpp -o node2 -lssl -lcrypto
+clear && g++ main_node3.cpp blockchain.cpp blockchain_node.cpp p2p_network.cpp -o node3 -std=c++11 -lpthread -lssl -lcrypto

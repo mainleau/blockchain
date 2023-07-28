@@ -1,6 +1,8 @@
 // p2p_network.cpp
 
 #include "p2p_network.h"
+#include <iostream>
+#include <algorithm>
 
 void P2PNetwork::startServer() {
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -39,7 +41,7 @@ void P2PNetwork::startServer() {
     }
 }
 
-void P2PNetwork::connectToPeer(const std::string& ipAddress) {
+void P2PNetwork::connectToPeer(const std::string& ipAddress, int port) {
     int peerSockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (peerSockfd < 0) {
         std::cerr << "Error creating socket" << std::endl;
