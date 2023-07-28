@@ -58,7 +58,17 @@ int main() {
 
         // Envoi du bloc au nœud 2 via le socket
         std::string serializedBlock = serializeBlock(node1Block);
-        send(sockfd, serializedBlock.c_str(), serializedBlock.size(), 0);
+        int totalSent = 0;
+        while (totalSent < serializedBlock.size()) {
+            int bytesSent = send(sockfd, serializedBlock.c_str() + totalSent, serializedBlock.size() - totalSent, 0);
+            if (bytesSent < 0) {
+                std::cerr << "Erreur lors de l'envoi du bloc au nœud 2" << std::endl;
+                close(sockfd);
+                return 1;
+            }
+            totalSent += bytesSent;
+        }
+
 
         std::cout << "Bloc envoyé au nœud 2 : " << serializedBlock << std::endl;
 
