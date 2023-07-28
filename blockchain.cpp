@@ -33,10 +33,17 @@ std::string calculateHash(const std::string& input) {
 // Fonction pour sérialiser un bloc en chaîne de caractères
 std::string serializeBlock(const Block& block) {
     std::stringstream ss;
-    ss << block.index << block.previousHash << block.timestamp << block.nonce << block.hash;
+    ss << block.index << ';'
+       << block.previousHash << ';'
+       << block.timestamp << ';'
+       << block.nonce << ';'
+       << block.hash;
 
-    for (const auto& tx : block.transactions) {
-        ss << tx.sender << tx.receiver << tx.amount;
+    for (const Transaction& tx : block.transactions) {
+        ss << ';'
+           << tx.sender << ';'
+           << tx.receiver << ';'
+           << tx.amount;
     }
 
     return ss.str();
@@ -46,11 +53,30 @@ std::string serializeBlock(const Block& block) {
 Block deserializeBlock(const std::string& serializedBlock) {
     std::stringstream ss(serializedBlock);
     Block block;
-    ss >> block.index >> block.previousHash >> block.timestamp >> block.nonce >> block.hash;
+    std::string field;
 
-    while (!ss.eof()) {
+    std::getline(ss, field, ';');
+    block.index = std::stoi(field);
+
+    std::getline(ss, block.previousHash, ';');
+
+    std::getline(ss, field, ';');
+    block.timestamp = std::stoi(field);
+
+    std::getline(ss, field, ';');
+    block.nonce = std::stoi(field);
+
+    std::getline(ss, block.hash, ';');
+
+    while (std::getline(ss, field, ';')) {
         Transaction tx;
-        ss >> tx.sender >> tx.receiver >> tx.amount;
+        tx.sender = field;
+
+        std::getline(ss, tx.receiver, ';');
+
+        std::getline(ss, field, ';');
+        tx.amount = std::stod(field);
+
         block.transactions.push_back(tx);
     }
 
@@ -68,7 +94,7 @@ std::string mineBlock(Block& block, int difficulty) {
         for (const auto& tx : block.transactions) {
             ss << tx.sender << tx.receiver << tx.amount;
         }
-        std::cout << "Hash: " << ss.str() << std::endl;
+        // std::cout << "Hash: " << ss.str() << std::endl;
         hash = calculateHash(ss.str());
     } while (hash.substr(0, difficulty) != target);
     return hash;

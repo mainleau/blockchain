@@ -1,0 +1,1 @@
+g++ node1.cpp blockchain.cpp -o node1 -lssl -lcrypto && g++ node2.cpp blockchain.cpp -o node2 -lssl -lcrypto

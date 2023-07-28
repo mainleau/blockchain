@@ -14,7 +14,6 @@ std::mutex blockchainMutex; // Mutex pour protéger l'accès à la blockchain
 // Fonction pour gérer une connexion de nœud 1
 void handleConnection(int clientSockfd, std::vector<Block>& blockchain) {
     std::cout << "Connexion établie avec le nœud 1" << std::endl;
-
     while (true) {
         // Réception du bloc depuis le nœud 1 via le socket
         char buffer[1024] = {0};
@@ -31,6 +30,7 @@ void handleConnection(int clientSockfd, std::vector<Block>& blockchain) {
         // Désérialisation du bloc reçu
         std::string serializedBlock(buffer, bytesReceived);
         Block receivedBlock = deserializeBlock(serializedBlock);
+        // std::cout << receivedBlock.hash << std::endl;
 
         // Ajout du bloc reçu à la blockchain du nœud 2 (sous verrou pour éviter les conflits)
         std::lock_guard<std::mutex> lock(blockchainMutex);

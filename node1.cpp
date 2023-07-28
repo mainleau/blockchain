@@ -51,6 +51,7 @@ int main() {
         // Minage du bloc avec une difficulté de 4 (pour la simplicité)
         int difficulty = 4;
         std::string minedHash = mineBlock(node1Block, difficulty);
+        node1Block.hash = minedHash;
 
         // Diffusion du bloc nouvellement miné à tous les nœuds du réseau
         broadcastBlock(node1Block, blockchain);
