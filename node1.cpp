@@ -5,6 +5,7 @@
 #include <cstring>
 #include <unistd.h>
 #include <arpa/inet.h>
+#include <thread>
 #include "blockchain.h"
 
 int main() {
