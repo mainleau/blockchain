@@ -22,6 +22,18 @@ struct Block {
     std::string hash;
 };
 
+class Blockchain {
+    public:
+        Blockchain();
+
+        void addBlock(const Block& block);
+        bool isValidNewBlock(const Block& newBlock);
+        Block getLatestBlock() const;
+        std::vector<Block> chain;
+    private:
+    };
+
+
 std::string calculateHash(const std::string& input);
 std::string serializeBlock(const Block& block);
 Block deserializeBlock(const std::string& data);

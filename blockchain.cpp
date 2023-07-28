@@ -9,6 +9,48 @@
 #include <chrono>
 #include <iostream>
 
+Blockchain::Blockchain() {
+    // Créer le bloc génésis (premier bloc de la blockchain)
+    Block genesisBlock;
+    genesisBlock.index = 1;
+    genesisBlock.previousHash = "0000000000000000";
+    genesisBlock.timestamp = std::time(0);
+    genesisBlock.nonce = 0;
+    genesisBlock.hash = calculateHash(serializeBlock(genesisBlock));
+    chain.push_back(genesisBlock);
+}
+
+void Blockchain::addBlock(const Block& block) {
+    chain.push_back(block);
+}
+
+bool Blockchain::isValidNewBlock(const Block& newBlock) {
+    // Vérifier si le nouvel index est correct
+    if (newBlock.index != chain.size() + 1) {
+        return false;
+    }
+
+    // Vérifier si le nouvel hash est valide en fonction des preuves de travail (difficulté)
+    int difficulty = 4; // Valeur de la difficulté pour le minage (pour la simplicité)
+    std::string target(difficulty, '0');
+    std::string hash = calculateHash(serializeBlock(newBlock));
+    if (hash.substr(0, difficulty) != target) {
+        return false;
+    }
+
+    // Vérifier si le hash précédent correspond au dernier bloc de la chaîne
+    const Block& lastBlock = chain.back();
+    if (newBlock.previousHash != lastBlock.hash) {
+        return false;
+    }
+
+    return true;
+}
+
+Block Blockchain::getLatestBlock() const {
+    return chain.back();
+}
+
 // Fonction pour calculer le hash SHA-256 d'une chaîne
 std::string calculateHash(const std::string& input) {
     EVP_MD_CTX* mdctx;
