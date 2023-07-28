@@ -5,20 +5,18 @@
 #include <vector>
 #include <ctime>
 
-// Structure pour représenter une transaction
 struct Transaction {
     std::string sender;
     std::string receiver;
     double amount;
 };
 
-// Structure pour représenter un bloc
 struct Block {
     int index;
-    std::string previousHash;
+    int nonce;
     std::time_t timestamp;
     std::vector<Transaction> transactions;
-    int nonce;
+    std::string previousHash;
     std::string hash;
 };
 
@@ -29,8 +27,10 @@ class Blockchain {
         void addBlock(const Block& block);
         bool isValidNewBlock(const Block& newBlock);
         Block getLatestBlock() const;
-        std::vector<Block> chain;
+        bool isEmpty();
+        int getSize();
     private:
+        std::vector<Block> chain;
     };
 
 
@@ -40,4 +40,4 @@ Block deserializeBlock(const std::string& data);
 std::string mineBlock(Block& block, int difficulty);
 void broadcastBlock(const Block& block, std::vector<Block>& blockchain);
 
-#endif // BLOCKCHAIN_H
+#endif

@@ -3,6 +3,7 @@
 #include "p2p_network.h"
 #include <iostream>
 #include <algorithm>
+#include "blockchain.h"
 
 void P2PNetwork::startServer() {
     sockfd = socket(AF_INET, SOCK_STREAM, 0);

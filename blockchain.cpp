@@ -10,12 +10,11 @@
 #include <iostream>
 
 Blockchain::Blockchain() {
-    // Créer le bloc génésis (premier bloc de la blockchain)
     Block genesisBlock;
     genesisBlock.index = 1;
-    genesisBlock.previousHash = "0000000000000000";
-    genesisBlock.timestamp = std::time(0);
     genesisBlock.nonce = 0;
+    genesisBlock.timestamp = std::time(0);
+    genesisBlock.previousHash = "0000000000000000000000000000000000000000000000000000000000000000";
     genesisBlock.hash = calculateHash(serializeBlock(genesisBlock));
     chain.push_back(genesisBlock);
 }
@@ -24,21 +23,26 @@ void Blockchain::addBlock(const Block& block) {
     chain.push_back(block);
 }
 
+bool Blockchain::isEmpty() {
+    return chain.empty();
+}
+
+int Blockchain::getSize() {
+    return chain.size();
+}
+
 bool Blockchain::isValidNewBlock(const Block& newBlock) {
-    // Vérifier si le nouvel index est correct
     if (newBlock.index != chain.size() + 1) {
         return false;
     }
 
-    // Vérifier si le nouvel hash est valide en fonction des preuves de travail (difficulté)
-    int difficulty = 4; // Valeur de la difficulté pour le minage (pour la simplicité)
+    int difficulty = 4;
     std::string target(difficulty, '0');
     std::string hash = calculateHash(serializeBlock(newBlock));
     if (hash.substr(0, difficulty) != target) {
         return false;
     }
 
-    // Vérifier si le hash précédent correspond au dernier bloc de la chaîne
     const Block& lastBlock = chain.back();
     if (newBlock.previousHash != lastBlock.hash) {
         return false;
@@ -51,7 +55,6 @@ Block Blockchain::getLatestBlock() const {
     return chain.back();
 }
 
-// Fonction pour calculer le hash SHA-256 d'une chaîne
 std::string calculateHash(const std::string& input) {
     EVP_MD_CTX* mdctx;
     const EVP_MD* md;
@@ -72,7 +75,6 @@ std::string calculateHash(const std::string& input) {
     return ss.str();
 }
 
-// Fonction pour sérialiser un bloc en chaîne de caractères
 std::string serializeBlock(const Block& block) {
     std::stringstream ss;
     ss << block.index << ';'
@@ -91,7 +93,6 @@ std::string serializeBlock(const Block& block) {
     return ss.str();
 }
 
-// Fonction pour désérialiser une chaîne de caractères en un bloc
 Block deserializeBlock(const std::string& serializedBlock) {
     std::stringstream ss(serializedBlock);
     Block block;
@@ -125,7 +126,6 @@ Block deserializeBlock(const std::string& serializedBlock) {
     return block;
 }
 
-// Fonction pour générer le hash d'un bloc en effectuant le minage
 std::string mineBlock(Block& block, int difficulty) {
     std::string target(difficulty, '0');
     std::string hash;
@@ -136,15 +136,11 @@ std::string mineBlock(Block& block, int difficulty) {
         for (const auto& tx : block.transactions) {
             ss << tx.sender << tx.receiver << tx.amount;
         }
-        // std::cout << "Hash: " << ss.str() << std::endl;
         hash = calculateHash(ss.str());
     } while (hash.substr(0, difficulty) != target);
     return hash;
 }
 
-// Fonction pour diffuser un bloc nouvellement miné à tous les nœuds du réseau
 void broadcastBlock(const Block& block, std::vector<Block>& blockchain) {
-    // Dans un réseau réel, cette fonction enverrait le bloc à tous les autres nœuds du réseau
-    // Pour cet exemple, nous allons simplement ajouter le bloc à tous les nœuds de notre réseau local
     blockchain.push_back(block);
 }

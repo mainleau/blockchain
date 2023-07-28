@@ -10,6 +10,7 @@
 #include <arpa/inet.h>
 #include <thread>
 #include <mutex>
+#include "blockchain.h"
 
 const int PORT = 8080;
 
