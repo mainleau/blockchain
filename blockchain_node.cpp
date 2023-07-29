@@ -12,8 +12,12 @@ void BlockchainNode::connectToInitialPeers() {
     connectToPeer("127.0.0.1", 8082);
 }
 
+void BlockchainNode::addTransactionToBlock(const Transaction& tx) {
+    pendingBlock.transactions.push_back(tx);
+}
+
 bool BlockchainNode::hasPendingTransaction() const {
-    return pendingTransaction ? true : false;
+    return !pendingBlock.transactions.empty();
 }
 
 void BlockchainNode::connectToPeer(const std::string& ipAddress, int port) {
@@ -22,54 +26,33 @@ void BlockchainNode::connectToPeer(const std::string& ipAddress, int port) {
 
 BlockchainNode::BlockchainNode(int port) {
     p2pNetwork.startServer();
-}
-
-void BlockchainNode::sendTransactionToNetwork(const Transaction& transaction) {
-    // Serialize the transaction
-    std::string serializedTx = serializeTransaction(transaction);
-
-    // Broadcast the serialized transaction to all connected peers
-    p2pNetwork.broadcast(serializedTx);
-}
-
-std::string BlockchainNode::serializeTransaction(const Transaction& transaction) {
-    std::stringstream ss;
-    ss << transaction.sender << ";"
-       << transaction.receiver << ";"
-       << transaction.amount;
-    return ss.str();
+    pendingBlock = blockchain.getLatestBlock();
 }
 
 void BlockchainNode::start() {
     while (true) {
-
-        if(hasPendingTransaction()) {
-            Block newBlock;
-            newBlock.index = blockchain.getSize() + 1;
-            newBlock.previousHash = blockchain.isEmpty() ? "0000000000000000" : blockchain.getLatestBlock().hash;
-            newBlock.timestamp = std::time(0);
-            newBlock.nonce = 0;
-
-            Transaction tx;
-            tx.sender = "Alice";
-            tx.receiver = "Bob";
-            tx.amount = 1.5;
-            newBlock.transactions.push_back(tx);
-
-            int difficulty = 4;
-            std::string minedHash = mineBlock(newBlock, difficulty);
-            newBlock.hash = minedHash;
-
-            blockchain.addBlock(newBlock);
-
-            // Broadcast the new block to all connected peers
-            p2pNetwork.broadcast(serializeBlock(newBlock));
-
-            std::cout << "Mined new block with hash: " << newBlock.hash << std::endl;
+        std::cout << (hasPendingTransaction() ? "ok" : "pasok") << std::endl;
+        if (!hasPendingTransaction()) {
+            std::this_thread::sleep_for(std::chrono::seconds(5));
+            continue;
         }
 
-        // Add a delay to simulate mining time between blocks
-        std::this_thread::sleep_for(std::chrono::seconds(5));
+        Block newBlock = pendingBlock;
+        int difficulty = 4;
+        std::string minedHash = mineBlock(newBlock, difficulty);
+        newBlock.hash = minedHash;
+
+        blockchain.addBlock(newBlock);
+        p2pNetwork.broadcast(serializeBlock(newBlock));
+
+        std::cout << "Mined new block with hash: " << newBlock.hash << std::endl;
+
+        // Clear the pending transactions after mining
+        pendingBlock.index = newBlock.index + 1;
+        pendingBlock.nonce = 0;
+        pendingBlock.timestamp = std::time(0);
+        pendingBlock.previousHash = newBlock.hash;
+        pendingBlock.transactions.clear();
     }
 }
 

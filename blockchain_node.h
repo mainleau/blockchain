@@ -17,11 +17,9 @@ class BlockchainNode {
         void connectToPeer(const std::string& ipAddress, int port);
         void handleNewBlock(const Block& block);
         void addTransactionToBlock(const Transaction& tx);
-        void sendTransactionToNetwork(const Transaction& transaction);
-        std::string serializeTransaction(const Transaction& transaction);
         bool hasPendingTransaction() const;
     private:
-        bool pendingTransaction;
+        Block pendingBlock;
         Blockchain blockchain;
         P2PNetwork p2pNetwork;
 };

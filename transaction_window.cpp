@@ -20,7 +20,9 @@ TransactionWindow::TransactionWindow() {
     button_send.set_label("Send");
     add(mainLayout);
 
-    button_send.signal_clicked().connect(sigc::mem_fun(*this, &TransactionWindow::on_button_send_clicked));
+    button_send.signal_clicked().connect([&]() {
+        on_button_send_clicked();
+    });
 
     show_all_children();
 }
@@ -36,6 +38,7 @@ void TransactionWindow::on_button_send_clicked() {
     std::string receiver = entry_receiver.get_text();
     double amount = std::stod(entry_amount.get_text());
 
+
     // Create the transaction
     Transaction tx;
     tx.sender = sender;
@@ -44,6 +47,6 @@ void TransactionWindow::on_button_send_clicked() {
 
     // Send the transaction to the network using blockchainNode
     if (blockchainNode) {
-        blockchainNode->sendTransactionToNetwork(tx);
+        blockchainNode->addTransactionToBlock(tx);
     }
 }
