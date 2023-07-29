@@ -7,8 +7,15 @@
 #include <thread>
 #include <sstream>
 
-void BlockchainNode::connectToInitialPeers() {
-    connectToPeer("127.0.0.1", 8081);
+BlockchainNode::BlockchainNode(int port) {
+    std::thread serverThread(&P2PNetwork::startServer, &p2pNetwork, port);
+    serverThread.detach();
+    p2pNetwork.startServer(port);
+    pendingBlock = blockchain.getLatestBlock();
+}
+
+void BlockchainNode::connectToPeer(const std::string& ipAddress, int port) {
+    p2pNetwork.connectToPeer(ipAddress, port);
 }
 
 void BlockchainNode::addTransactionToBlock(const Transaction& tx) {
@@ -19,17 +26,18 @@ bool BlockchainNode::hasPendingTransaction() const {
     return !pendingBlock.transactions.empty();
 }
 
-void BlockchainNode::connectToPeer(const std::string& ipAddress, int port) {
-    p2pNetwork.connectToPeer(ipAddress, port);
-}
-
-BlockchainNode::BlockchainNode(int port) {
-    p2pNetwork.startServer();
-    pendingBlock = blockchain.getLatestBlock();
+void BlockchainNode::handleNewBlock(const Block& block) {
+    if (blockchain.isValidNewBlock(block)) {
+        blockchain.addBlock(block);
+        std::cout << "Added new block with hash: " << block.hash << std::endl;
+    } else {
+        std::cout << "Received invalid block, discarding..." << std::endl;
+    }
 }
 
 void BlockchainNode::start() {
-    std::thread miningThread(&BlockchainNode::mine, this); // Démarrer le thread de minage
+    std::thread miningThread(&BlockchainNode::mine, this);
+
     while (!shouldStop) {
         std::unique_lock<std::mutex> lock(mineMutex);
         mineCondition.wait(lock, [&]() { return shouldMine || shouldStop; });
@@ -84,14 +92,4 @@ void BlockchainNode::stop() {
         shouldStop = true;
     }
     mineCondition.notify_one(); // Notifier le thread de minage pour qu'il puisse s'arrêter
-}
-
-void BlockchainNode::handleNewBlock(const Block& block) {
-    // Check if the received block is valid and can be added to the local blockchain
-    if (blockchain.isValidNewBlock(block)) {
-        blockchain.addBlock(block);
-        std::cout << "Added new block with hash: " << block.hash << std::endl;
-    } else {
-        std::cout << "Received invalid block, discarding..." << std::endl;
-    }
 }

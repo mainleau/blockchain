@@ -12,19 +12,18 @@
 #include <mutex>
 #include "blockchain.h"
 
-const int PORT = 8080;
-
 class P2PNetwork {
-public:
-    void startServer();
-    void connectToPeer(const std::string& ipAddress, int port);
-    void broadcast(const std::string& message, int senderSockfd = -1);
-private:
-    void handleConnection(int clientSockfd);
+    public:
+        void startServer(int port);
+        void connectToPeer(const std::string& ipAddress, int port);
+        void broadcast(const std::string& message, int senderSockfd = -1);
+        void listenForConnections();
+    private:
+        void handleConnection(int clientSockfd);
+        int sockfd;
 
-    int sockfd;
-    std::vector<int> connectedSockets;
-    std::mutex socketMutex;
+        std::vector<int> connectedSockets;
+        std::mutex socketMutex;
 };
 
 #endif // P2P_NETWORK_H

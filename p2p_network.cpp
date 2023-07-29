@@ -4,8 +4,9 @@
 #include <iostream>
 #include <algorithm>
 #include "blockchain.h"
+#include <thread>
 
-void P2PNetwork::startServer() {
+void P2PNetwork::startServer(int port) {
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0) {
         std::cerr << "Error creating socket" << std::endl;
@@ -14,7 +15,7 @@ void P2PNetwork::startServer() {
 
     sockaddr_in serverAddr;
     serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(PORT);
+    serverAddr.sin_port = htons(port);
     serverAddr.sin_addr.s_addr = INADDR_ANY;
 
     if (bind(sockfd, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) < 0) {
@@ -29,10 +30,14 @@ void P2PNetwork::startServer() {
 
     std::cout << "P2P Server started, listening for incoming connections..." << std::endl;
 
+    std::thread serverThread(&P2PNetwork::listenForConnections, this);
+    serverThread.detach(); 
+}
+
+void P2PNetwork::listenForConnections() {
     while (true) {
         int clientSockfd = accept(sockfd, NULL, NULL);
         if (clientSockfd < 0) {
-            std::cerr << "Error accepting connection" << std::endl;
             continue;
         }
 
@@ -51,7 +56,7 @@ void P2PNetwork::connectToPeer(const std::string& ipAddress, int port) {
 
     sockaddr_in peerAddr;
     peerAddr.sin_family = AF_INET;
-    peerAddr.sin_port = htons(PORT);
+    peerAddr.sin_port = htons(port);
     inet_pton(AF_INET, ipAddress.c_str(), &peerAddr.sin_addr);
 
     if (connect(peerSockfd, (struct sockaddr*)&peerAddr, sizeof(peerAddr)) < 0) {

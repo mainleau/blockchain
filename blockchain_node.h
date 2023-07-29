@@ -16,7 +16,6 @@ class BlockchainNode {
         void start();
         void stop();
 
-        void connectToInitialPeers();
         void connectToPeer(const std::string& ipAddress, int port);
         void handleNewBlock(const Block& block);
         void addTransactionToBlock(const Transaction& tx);

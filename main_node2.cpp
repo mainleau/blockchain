@@ -10,8 +10,8 @@ int main(int argc, char* argv[]) {
 
     TransactionWindow transactionWindow;
 
-    BlockchainNode node2(8081);
-    node2.connectToPeer("127.0.0.1", 8080);
+    BlockchainNode node2(9001);
+    node2.connectToPeer("127.0.0.1", 9000);
     
     std::thread nodeThread([&]() {
         node2.start();
